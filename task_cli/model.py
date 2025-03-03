@@ -39,7 +39,7 @@ class Task:
         return rep_dict
 
     def __str__(self):
-        return f"{self.id}\t{self.description}"
+        return f"{self.id}\t{self.status}\t{self.description}"
 
     @classmethod
     def count(cls):
@@ -52,14 +52,34 @@ class Task:
             return len(tasks)
 
     @classmethod
-    def query(cls):
+    def create_if_exist(csl, id):
         with open(FILE_NAME, mode="r+") as f:
             try:
                 tasks = json.load(f)
             except Exception as e:
                 print("Error: ", e)
                 tasks = {}
-            return [cls(**task) for task in tasks.values()]
+        available_id = id
+        while tasks.get(f"{available_id}", None):
+            available_id += 1
+        return available_id
+
+    @classmethod
+    def query(cls, status: str = None):
+        with open(FILE_NAME, mode="r+") as f:
+            try:
+                tasks = json.load(f)
+            except Exception as e:
+                print("Error: ", e)
+                tasks = {}
+            if status:
+                return [
+                    cls(**task)
+                    for task in tasks.values()
+                    if task.get("status") == status
+                ]
+            else:
+                return [cls(**task) for task in tasks.values()]
 
     @classmethod
     def get(cls, task_id: int):
@@ -83,6 +103,30 @@ class Task:
             else:
                 return None
 
+    @classmethod
+    def delete(cls, task_id: int):
+        with open(FILE_NAME, mode="r+") as f:
+            try:
+                tasks = json.load(f)
+            except Exception as e:
+                print("Error: ", e)
+                tasks = {}
+
+            task = tasks.pop(f"{task_id}")
+            f.seek(0, 0)
+            json.dump(tasks, f, indent=4)
+            f.truncate()
+        with open(HASHED_IDS, mode="r+") as f:
+            try:
+                hash_tasks = json.load(f)
+            except Exception as e:
+                print("Error: ", e)
+                hash_tasks = {}
+            hash_tasks.pop(task.get("hash_id"))
+            f.seek(0, 0)
+            json.dump(hash_tasks, f, indent=4)
+            f.truncate()
+
     def save(self):
         with open(FILE_NAME, mode="r+") as f:
             try:
@@ -90,7 +134,7 @@ class Task:
             except Exception as e:
                 print("Error: ", e)
                 tasks = {}
-            tasks[self.id] = self.as_dict()
-            f.seek(0)
+            tasks[f"{self.id}"] = self.as_dict()
+            f.seek(0, 0)
             json.dump(tasks, f, indent=4)
             f.truncate()
