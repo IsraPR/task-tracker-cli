@@ -1,15 +1,17 @@
 # pyproject.toml
-
 [build-system]
 requires = ["setuptools>=64.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "task_cli"
-version = "0.0.1"
+version = "0.1.0"
 description = "Task tracker cli project"
 readme = "README.md"
 authors = [{ name = "Isra Dev", email = "isra.mail.contact@gmail.com" }]
 
 [project.scripts]
-task-cli = "task_cli.__main__:main"
+task-cli = "task_cli.cli:main"
+
+[tool.setuptools]
+packages = ["task_cli"]
