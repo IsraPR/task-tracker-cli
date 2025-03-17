@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from enum import Enum
-from utils import create_md5_id
+from .utils import create_md5_id
 
 FILE_NAME = "data/tasks.json"
 HASHED_IDS = "data/tasks_hashed.json"
